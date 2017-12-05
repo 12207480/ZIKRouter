@@ -15,6 +15,8 @@
 #import <objc/runtime.h>
 #import "ZIKRouterRuntime.h"
 #import "ZIKRouter.h"
+#import "ZIKBlockRouteEntry.h"
+#import "ZIKServiceBlockRouter.h"
 
 static NSMutableSet<Class> *_registries;
 static BOOL _autoRegistrationFinished = NO;
@@ -83,6 +85,14 @@ static BOOL _autoRegistrationFinished = NO;
     return nil;
 }
 + (CFMutableDictionaryRef)_check_routerToDestinationProtocolsMap {
+    NSAssert(NO, @"%@ must override %@",self,NSStringFromSelector(_cmd));
+    return nil;
+}
++ (CFMutableDictionaryRef)destinationToRouteEntryMap {
+    NSAssert(NO, @"%@ must override %@",self,NSStringFromSelector(_cmd));
+    return nil;
+}
++ (CFMutableDictionaryRef)destinationProtocolToRouteEntryMap {
     NSAssert(NO, @"%@ must override %@",self,NSStringFromSelector(_cmd));
     return nil;
 }
@@ -257,4 +267,29 @@ static BOOL _autoRegistrationFinished = NO;
     CFDictionarySetValue(self.moduleConfigProtocolToRouterMap, (__bridge const void *)(configProtocol), (__bridge const void *)(routerClass));
 }
 
++ (ZIKBlockRouteEntry *)registerDestination:(Class)destinationClass making:(id(^)(void))makeDestination {
+    NSAssert(self.destinationToRouteEntryMap,@"destinationToRouteEntryMap not initialized");
+    ZIKBlockRouteEntry *entry = CFDictionaryGetValue(self.destinationToRouteEntryMap, (__bridge const void *)(destinationClass));
+    if (!entry) {
+        entry = [ZIKBlockRouteEntry new];
+        CFDictionaryAddValue(self.destinationToRouteEntryMap, (__bridge const void *)(destinationClass), (__bridge const void *)(entry));
+    }
+    entry.makeDestination = makeDestination;
+    return entry;
+}
+
++ (void)registerDestinationProtocol:(Protocol *)destinationProtocol routeEntry:(ZIKBlockRouteEntry *)entry {
+    NSAssert(self.destinationProtocolToRouteEntryMap,@"destinationProtocolToRouteEntryMap not initialized");
+//    ZIKBlockRouteEntry *entry = CFDictionaryGetValue(self.destinationToRouteEntryMap, (__bridge const void *)(destinationClass));
+    if (entry) {
+        CFDictionaryAddValue(self.destinationProtocolToRouteEntryMap, (__bridge const void *)(destinationProtocol), (__bridge const void *)(entry));
+    }
+}
+
++ (ZIKRouter *)routerToService:(Protocol *)serviceProtocol {
+    NSAssert(self.destinationToRouteEntryMap,@"destinationToRouteEntryMap not initialized");
+    ZIKBlockRouteEntry *entry = CFDictionaryGetValue(self.destinationProtocolToRouteEntryMap, (__bridge const void *)(serviceProtocol));
+    ZIKServiceBlockRouter *router = [[ZIKServiceBlockRouter alloc] initWithRoute:entry];
+    return router;
+}
 @end

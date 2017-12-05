@@ -8,6 +8,7 @@
 
 #import "ZIKTimeServiceRouter.h"
 #import "ZIKTimeService.h"
+@import ZIKRouter.Internal;
 
 @interface ZIKTimeService (ZIKTimeServiceRouter) <ZIKRoutableService>
 @end
@@ -19,9 +20,19 @@
 + (void)registerRoutableDestination {
     [self registerService:[ZIKTimeService class]];
     [self registerServiceProtocol:@protocol(ZIKTimeServiceInput)];
+    [ZIKServiceRouteRegistry
+     registerDestination:[ZIKTimeService class]
+     making:^id _Nonnull{
+        return [ZIKTimeService sharedInstance];
+     }].registerDestinationProtocol(@protocol(ZIKTimeServiceInput))
+    .prepareDestination(^(id destination){
+         NSLog(@"Prepare dest :%@",destination);
+     });
 }
 
 - (id)destinationWithConfiguration:(__kindof ZIKRouteConfiguration *)configuration {
+    ZIKRouter *r = [ZIKServiceRouteRegistry routerToService:@protocol(ZIKTimeServiceInput)];
+//    ZIKTimeService *s = [r performwith];
     return [ZIKTimeService sharedInstance];
 }
 

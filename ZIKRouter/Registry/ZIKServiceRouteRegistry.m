@@ -27,6 +27,8 @@ static CFMutableDictionaryRef _check_routerToDestinationProtocolsMap;
 static NSMutableArray<Class> *_routableDestinations;
 static NSMutableArray<Class> *_routerClasses;
 #endif
+static CFMutableDictionaryRef _destinationToRouteEntryMap;
+static CFMutableDictionaryRef _destinationProtocolToRouteEntryMap;
 
 @implementation ZIKServiceRouteRegistry
 
@@ -86,6 +88,22 @@ static NSMutableArray<Class> *_routerClasses;
 #else
     return NULL;
 #endif
+}
+
++ (CFMutableDictionaryRef)destinationToRouteEntryMap {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        _destinationToRouteEntryMap = CFDictionaryCreateMutable(kCFAllocatorDefault, 0, NULL, &kCFTypeDictionaryValueCallBacks);
+    });
+    return _destinationToRouteEntryMap;
+}
+
++ (CFMutableDictionaryRef)destinationProtocolToRouteEntryMap {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        _destinationProtocolToRouteEntryMap = CFDictionaryCreateMutable(kCFAllocatorDefault, 0, NULL, &kCFTypeDictionaryValueCallBacks);
+    });
+    return _destinationProtocolToRouteEntryMap;
 }
 
 + (void)willEnumerateClasses {

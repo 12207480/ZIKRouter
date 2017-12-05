@@ -13,8 +13,11 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class ZIKBlockRouteEntry;
 @interface ZIKRouteRegistry : NSObject
 @property (nonatomic, class, readonly) BOOL autoRegistrationFinished;
+
++ (ZIKBlockRouteEntry *)registerDestination:(Class)destinationClass making:(id(^)(void))makeDestination;
 @end
 
 NS_ASSUME_NONNULL_END

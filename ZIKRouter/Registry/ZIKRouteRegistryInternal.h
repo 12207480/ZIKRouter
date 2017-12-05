@@ -13,6 +13,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class ZIKRouter, ZIKBlockRouteEntry;
 @interface ZIKRouteRegistry ()
 ///key: destination protocol, value: router class
 @property (nonatomic, class, readonly) CFMutableDictionaryRef destinationProtocolToRouterMap;
@@ -43,6 +44,8 @@ NS_ASSUME_NONNULL_BEGIN
 + (_Nullable Class)routerToDestination:(Protocol *)destinationProtocol;
 + (_Nullable Class)routerToModule:(Protocol *)configProtocol;
 
++ (ZIKRouter *)routerToService:(Protocol *)serviceProtocol;
++ (void)registerDestinationProtocol:(Protocol *)destinationProtocol routeEntry:(ZIKBlockRouteEntry *)entry;
 #pragma mark Register
 
 + (void)registerDestination:(Class)destinationClass router:(Class)routerClass;
